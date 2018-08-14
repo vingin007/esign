@@ -2,7 +2,7 @@
     "name": "vingin007/esign",
     "type": "library",
     "require": {
-        "php": ">5.4"
+        "php": ">5.3"
     },
     "autoload": {
         "psr-4": {
