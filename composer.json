@@ -10,5 +10,9 @@
             "email": "2681977867@qq.com"
         }
     ],
-    "minimum-stability": "stable"
+    "autoload": {
+        "psr-4": {
+            "tech\\": "src/"
+        }
+    },
 }
