@@ -1,5 +1,5 @@
 {
-    "name": "sgys/esign",
+    "name": "vingin007/esign",
     "type": "library",
     "require": {
         "php": ">=5.4"
