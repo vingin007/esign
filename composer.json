@@ -1,0 +1,14 @@
+{
+    "name": "sgys/esign",
+    "type": "library",
+    "require": {
+        "php": ">=5.4"
+    },
+    "authors": [
+        {
+            "name": "wxl",
+            "email": "2681977867@qq.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
