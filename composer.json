@@ -1,25 +1,15 @@
 {
     "name": "vingin007/esign",
+    "description": "阿里短信-适用Laravel、Yii、Thinkphp等任何PHP项目...",
+    "keywords": ["阿里短信", "flc", "dysms", "alisms", "aliyun"],
     "type": "library",
+    "license": "MIT",
     "require": {
-        "php": ">5.3"
+        "php": ">=5.4.0"
     },
     "autoload": {
         "psr-4": {
-            "tech\\": "src/"
+            "Flc\\Dysms\\": "src/"
         }
-    },
-    "repositories": {
-        "packagist": {
-            "type": "composer",
-            "url": "https://packagist.org"
-        }
-    },
-    "minimum-stability": "dev",
-    "authors": [
-        {
-            "name": "wxl",
-            "email": "2681977867@qq.com"
-        }
-    ]
+    }
 }
