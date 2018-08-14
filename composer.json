@@ -9,6 +9,13 @@
             "tech\\": "src/"
         }
     },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.org"
+        }
+    },
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "wxl",
