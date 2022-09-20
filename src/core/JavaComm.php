@@ -15,6 +15,10 @@ class JavaComm
 {
     private $serverName;
 
+    private $config = array();
+
+    private $HttpUtils;
+
     private static $serverUrl = array(
         'javaInitUrl' => '/tech-sdkwrapper/timevale/init',
         'selfFileSignUrl' => '/tech-sdkwrapper/timevale/sign/selfFileSign',
@@ -42,43 +46,44 @@ class JavaComm
         'createFromTemplateStream' => '/tech-sdkwrapper/timevale/doc/stream/createFromTemplate', //本地pdf模板生成,文件流
     );
 
-    public function __construct($serverName)
+    public function __construct(array $config)
     {
-        $this->serverName = $serverName;
+        $this->config = $config;
+        $this->serverName = $this->config['java_server'];
+        $this->HttpUtils = new HttpUtils($config);
     }
 
     /**
      * 初始化 本地java服务
-     * @param $config
      * @throws \Exception
      */
-    public function init($config)
+    public function init()
     {
-        if (!empty($config['rsa_private_key'])) {
-            $privateKey = $config['rsa_private_key'];
+        if (!empty($this->config['rsa_private_key'])) {
+            $privateKey = $this->config['rsa_private_key'];
         } else {
             $privateKey = '';
         }
-        if (!empty($config['esign_public_key'])) {
-            $publicKey = $config['esign_public_key'];
+        if (!empty($this->config['esign_public_key'])) {
+            $publicKey = $this->config['esign_public_key'];
         } else {
             $publicKey = '';
         }
         //请求参数
         $keysArr = array(
             'projectConfig' => array(
-                'projectId' => $config['project_id'],
-                'projectSecret' => $config['project_secret'],
-                'itsmApiUrl' => $config['open_api_url']
+                'projectId' => $this->config['project_id'],
+                'projectSecret' => $this->config['project_secret'],
+                'itsmApiUrl' => $this->config['open_api_url']
             ),
             'httpConfig' => array(
-                'proxyIp' => $config['proxy_ip'],
-                'proxyPort' => $config['proxy_port'],
-                'retry' => empty($config['retry']) ? 3 : $config['retry'],
-                'httpType' => empty($config['http_type']) ? 'HTTPS' : $config['http_type']
+                'proxyIp' => $this->config['proxy_ip'],
+                'proxyPort' => $this->config['proxy_port'],
+                'retry' => empty($this->config['retry']) ? 3 : $this->config['retry'],
+                'httpType' => empty($this->config['http_type']) ? 'HTTPS' : $this->config['http_type']
             ),
             'signConfig' => array(
-                'algorithm' => $config['sign_algorithm'],
+                'algorithm' => $this->config['sign_algorithm'],
                 'privateKey' => $privateKey,
                 'esignPublicKey' => $publicKey
             )
@@ -179,7 +184,7 @@ class JavaComm
             'signType' => $signType,
             'certId' => $certId,
             'sealData' => $sealData,
-            'file' => HttpUtils::request()->getRealFileIgnore(Util::encodePath($signFile['srcPdfFile'])),
+            'file' => $this->HttpUtils->getRealFileIgnore(Util::encodePath($signFile['srcPdfFile'])),
             'fileName' => isset($signFile['fileName']) ? $signFile['fileName'] : '',
             'ownerPassword' => isset($signFile['ownerPassword']) ? $signFile['ownerPassword'] : ''
         );
@@ -426,7 +431,7 @@ class JavaComm
         if (empty($file)) {
             return ErrorConstant::$FILE_NOT_EXIST;
         }
-        $keysArr['file'] = HttpUtils::request()->getRealFileIgnore(Util::encodePath($file));
+        $keysArr['file'] = $this->HttpUtils->getRealFileIgnore(Util::encodePath($file));
         $response = $this->post('streamVerifyUrl', $keysArr);
         return $response;
     }
@@ -492,7 +497,7 @@ class JavaComm
             if (!empty($txtFields)) {
                 $keysArr['txtFields'] = Util::jsonEncode($txtFields);
             }
-            $keysArr['file'] = HttpUtils::request()->getRealFileIgnore(Util::encodePath($tmpFile['srcFileUrl']));
+            $keysArr['file'] = $this->HttpUtils->getRealFileIgnore(Util::encodePath($tmpFile['srcFileUrl']));
             
             $response = $this->post('createFromTemplateStream', $keysArr);
 
@@ -548,7 +553,7 @@ class JavaComm
         );
         if ($stream === true) {
             $keysArr['signPos'] = Util::jsonEncode($signPos);
-            $keysArr['file'] = HttpUtils::request()->getRealFileIgnore(Util::encodePath($signFile['srcPdfFile']));
+            $keysArr['file'] = $this->HttpUtils->getRealFileIgnore(Util::encodePath($signFile['srcPdfFile']));
             $keysArr['fileName'] = isset($signFile['fileName']) ? $signFile['fileName'] : '';
             $keysArr['ownerPassword'] = isset($signFile['ownerPassword']) ? $signFile['ownerPassword'] : '';
         } else {
@@ -574,7 +579,7 @@ class JavaComm
     {
         $authUrl = $this->serverName . self::$serverUrl[$urlKey];
         try {
-            $response = HttpUtils::request()->noSignHttpPost($authUrl, $keysArr, true, false);
+            $response = $this->HttpUtils->noSignHttpPost($authUrl, $keysArr, true, false);
         } catch (\Exception $e) {
             echo $e->getMessage();
             exit;
@@ -592,7 +597,7 @@ class JavaComm
     private function post($urlKey, $keysArr)
     {
         $authUrl = $this->serverName . self::$serverUrl[$urlKey];
-        $response = HttpUtils::request()->noSignHttpPost($authUrl, $keysArr, false, false);
+        $response = $this->HttpUtils->noSignHttpPost($authUrl, $keysArr, false, false);
         //$response = $this->postFile($authUrl, $keysArr);
         return $response;
     }
@@ -639,14 +644,14 @@ class JavaComm
         $body[] = "--{$boundary}--";
         $body[] = "";
 
-        HttpUtils::request()->sendHttpRequestPost(
+        $this->HttpUtils->sendHttpRequestPost(
             $url,
             implode("\r\n", $body),
             $header = array(
                 "Content-Type: multipart/form-data; boundary={$boundary}",
             )
         );
-        return json_decode(HttpUtils::request()->responseBody, TRUE);
+        return json_decode($this->HttpUtils->responseBody, TRUE);
     }
 
 }

@@ -60,12 +60,12 @@ class eSign
      */
     private $javaComm;
 
-    public function __construct()
+    public function __construct(array $config)
     {
         if (empty(self::$_CONFIG)) {
-            self::$_CONFIG = config('esign.');
+            self::$_CONFIG = $config;
         }
-        $this->javaComm = new javaComm(self::$_CONFIG['java_server']);
+        $this->javaComm = new javaComm(self::$_CONFIG);
         $this->recorder = new Recorder();
         $this->init();
     }
@@ -166,7 +166,8 @@ class eSign
         );
 
         //初始化请求
-        $res = HttpUtils::request()->noSignHttpPost(
+        $HttpUtils = new HttpUtils(self::$_CONFIG);
+        $res = $HttpUtils->noSignHttpPost(
             self::$_CONFIG['open_api_url'],
             http_build_query($keysArr),
             $postJson = false,
@@ -1340,7 +1341,8 @@ class eSign
     private function withSignHttpPost($urlKey, $keysArr, $postJson = true)
     {
         $authUrl = $this->recorder->read($urlKey);
-        return HttpUtils::request()->buildSignHttpRequest($authUrl, $keysArr, $postJson);
+        $HttpUtils = new HttpUtils(self::$_CONFIG);
+        return $HttpUtils->buildSignHttpRequest($authUrl, $keysArr, $postJson);
     }
 
     const TECH_ADD_ACCOUNT_URL = 'techAddAccountUrlNew'; //1.添加账号

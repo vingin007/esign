@@ -35,7 +35,7 @@ class HttpUtils
     /**
      * 配置文件
      */
-    private $_config = array();
+    private $config = array();
 
     /**
      * 请求头
@@ -63,26 +63,13 @@ class HttpUtils
      */
     public $responseBody;
 
-    /**
-     * @return HttpUtils
-     */
-    public static function request()
-    {
-        static $req = false;
-        if ($req === false) {
-            $_config = config('esign.');
-            $req = new HttpUtils($_config);
-        }
-        return $req;
-    }
-
     /*
      * 构建
      *
      **/
-    public function __construct($config)
+    public function __construct(array $config)
     {
-        $this->_config = $config;
+        $this->config = $config;
         $this->requestHeader = array(
             'X-timevale-mode: package',
             'X-timevale-project-id:' . $config['project_id'],
@@ -345,12 +332,12 @@ class HttpUtils
     private function buildRequestSign($query)
     {
 
-        switch (strtoupper(trim($this->_config['sign_algorithm']))) {
+        switch (strtoupper(trim($this->config['sign_algorithm']))) {
             case 'HMACSHA256' :
-                $mySign = $this->hmacSHA256Sign($query, $this->_config['project_secret']);
+                $mySign = $this->hmacSHA256Sign($query, $this->config['project_secret']);
                 break;
             case 'RSA' :
-                $mySign = $this->rsaSign($query, $this->_config['rsa_private_key']);
+                $mySign = $this->rsaSign($query, $this->config['rsa_private_key']);
                 break;
             default :
                 $mySign = '';
@@ -368,11 +355,11 @@ class HttpUtils
     private function verifyResponse($str, $sign)
     {
         //验证服务端返回的签名
-        switch (strtoupper(trim($this->_config['sign_algorithm']))) {
+        switch (strtoupper(trim($this->config['sign_algorithm']))) {
             case 'HMACSHA256':
-                return $this->hmacSHA256Verify($str, $sign, $this->_config['project_secret']);
+                return $this->hmacSHA256Verify($str, $sign, $this->config['project_secret']);
             case 'RSA':
-                return $this->rsaVerify($str, $sign, $this->_config['esign_public_key']);
+                return $this->rsaVerify($str, $sign, $this->config['esign_public_key']);
                 break;
         }
         return false;
